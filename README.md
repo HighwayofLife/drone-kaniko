@@ -1,8 +1,11 @@
-# drone-kaniko
+drone-kaniko plugin
+===================
 
 A thin shim-wrapper around the official [Google Kaniko](https://cloud.google.com/blog/products/gcp/introducing-kaniko-build-container-images-in-kubernetes-and-google-container-builder-even-without-root-access) Docker image to make it behave like the [Drone Docker plugin](http://plugins.drone.io/drone-plugins/drone-docker/).
 
 Example .drone.yml for Drone 1.0 (pushing to Docker Hub):
+
+
 
 ```yaml
 kind: pipeline
@@ -10,7 +13,7 @@ name: default
 
 steps:
 - name: publish
-  image: banzaicloud/drone-kaniko
+  image: deck15/drone-kaniko:v0.4.2
   settings:
     registry: registry.example.com # if not provided index.docker.io is supposed
     repo: registry.example.com/example-project
@@ -34,7 +37,7 @@ name: default
 
 steps:
 - name: publish
-  image: banzaicloud/drone-kaniko
+  image: deck15/drone-kaniko:v0.4.2
   settings:
     registry: gcr.io
     repo: example.com/example-project
@@ -58,15 +61,15 @@ steps:
 - name: build
   image: golang
   commands:
-      - go get 
+      - go get
       - go build
       - make versiontags > .tags
 - name: publish
-  image: banzaicloud/drone-kaniko
+  image: deck15/drone-kaniko:v0.4.2
   settings:
-    registry: registry.example.com 
+    registry: registry.example.com
     repo: registry.example.com/example-project
-    # tags: ${DRONE_COMMIT_SHA} <= it must be left undefined 
+    # tags: ${DRONE_COMMIT_SHA} <= it must be left undefined
     username:
       from_secret: docker-username
     password:
@@ -76,7 +79,7 @@ steps:
 ## Test that it can build
 
 ```bash
-docker run -it --rm -w /src -v $PWD:/src -e PLUGIN_USERNAME=${DOCKER_USERNAME} -e PLUGIN_PASSWORD=${DOCKER_PASSWORD} -e PLUGIN_REPO=banzaicloud/drone-kaniko-test -e PLUGIN_TAGS=test -e PLUGIN_DOCKERFILE=Dockerfile.test banzaicloud/drone-kaniko
+docker run -it --rm -w /src -v $PWD:/src -e PLUGIN_USERNAME=${DOCKER_USERNAME} -e PLUGIN_PASSWORD=${DOCKER_PASSWORD} -e PLUGIN_REPO=deck15/drone-kaniko-test -e PLUGIN_TAGS=test -e PLUGIN_DOCKERFILE=Dockerfile.test deck15/drone-kaniko
 ```
 
 ## Test that caching works
@@ -95,7 +98,7 @@ Add the following lines to plugin.sh's final command and build a new image from 
 ```
 
 ```bash
-docker build -t banzaicloud/drone-kaniko .
+docker build -t deck15/drone-kaniko .
 ```
 
 
@@ -109,11 +112,11 @@ docker run -v $PWD:/cache gcr.io/kaniko-project/warmer:latest --verbosity=debug 
 Run the builder (on the host network to be able to access the registry, if any specified) with mounting the local disk cache, this example pushes to Docker Hub:
 
 ```bash
-docker run --net=host -it --rm -w /src -v $PWD:/cache -v $PWD:/src -e PLUGIN_USERNAME=${DOCKER_USERNAME} -e PLUGIN_PASSWORD=${DOCKER_PASSWORD} -e PLUGIN_REPO=banzaicloud/drone-kaniko-test -e PLUGIN_TAGS=test -e PLUGIN_DOCKERFILE=Dockerfile.test -e PLUGIN_CACHE=true banzaicloud/drone-kaniko
+docker run --net=host -it --rm -w /src -v $PWD:/cache -v $PWD:/src -e PLUGIN_USERNAME=${DOCKER_USERNAME} -e PLUGIN_PASSWORD=${DOCKER_PASSWORD} -e PLUGIN_REPO=deck15/drone-kaniko-test -e PLUGIN_TAGS=test -e PLUGIN_DOCKERFILE=Dockerfile.test -e PLUGIN_CACHE=true deck15/drone-kaniko
 ```
 
 The very same example just pushing to GCR instead of Docker Hub:
 
 ```bash
-docker run --net=host -it --rm -w /src -v $PWD:/cache -v $PWD:/src -e PLUGIN_REGISTRY=gcr.io -e PLUGIN_REPO=paas-dev1/drone-kaniko-test -e PLUGIN_TAGS=test -e PLUGIN_DOCKERFILE=Dockerfile.test -e PLUGIN_CACHE=true -e PLUGIN_JSON_KEY="$(<$HOME/google-application-credentials.json)" banzaicloud/drone-kaniko
+docker run --net=host -it --rm -w /src -v $PWD:/cache -v $PWD:/src -e PLUGIN_REGISTRY=gcr.io -e PLUGIN_REPO=paas-dev1/drone-kaniko-test -e PLUGIN_TAGS=test -e PLUGIN_DOCKERFILE=Dockerfile.test -e PLUGIN_CACHE=true -e PLUGIN_JSON_KEY="$(<$HOME/google-application-credentials.json)" deck15/drone-kaniko
 ```
